@@ -189,6 +189,7 @@
   <ItemGroup>
     <Compile Include="Class1.cs" />
     <Compile Include="config.cs" />
+    <Compile Include="Data.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -210,4 +211,8 @@
     <Folder Include="Resources\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>xcopy /y "$(TargetPath)" "C:\Program Files (x86)\Steam\steamapps\common\Audica\Mods"
+start steam://rungameid/1020340</PostBuildEvent>
+  </PropertyGroup>
 </Project>
