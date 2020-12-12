@@ -26,7 +26,7 @@ namespace TimingAttack {
 
 		[HarmonyPatch(typeof(CueDartManager), "ShouldCreateDart")]
 		class CueDartManager_ShouldCreateDart {
-			static void Postfix (ref bool __result) {
+			static bool Prefix (ref bool __result) {
 				var shouldDart = ShouldDart();
 				if (Config.HiddenDarts == true || ForceEnable == true || Data.firstDart == true || shouldDart == true) {
 					if (Data.firstDart == true || shouldDart == true) {
@@ -36,6 +36,7 @@ namespace TimingAttack {
 						__result = false;
 					}
 				}
+				return __result;
 			}
 		}
 
@@ -54,7 +55,7 @@ namespace TimingAttack {
 				if (Data.darts.Length == 0) { return false; }
 				int currTick = (int)AudioDriver.I.mCachedTick;
 				if (currTick >= Data.darts[0][0] & currTick <= Data.darts[0][1]) {
-					MelonLogger.Log($"DARTING: {(int)AudioDriver.I.mCachedTick}");
+					// MelonLogger.Log($"DARTING: {(int)AudioDriver.I.mCachedTick}");
 					return true; 
 				}
 				if (currTick > Data.darts[0][1]) { Data.darts = Data.darts.Where((item, index) => index != 0).ToArray(); } // we dont talk about this
@@ -90,6 +91,8 @@ namespace TimingAttack {
 			List<CueRange> ranges = new List<CueRange>();
 			int lastTick = 0;
 			for (int i = 0; i < cues.Length; i++) {
+				if (cues[i].behavior == Target.TargetBehavior.Melee || cues[i].behavior == Target.TargetBehavior.Dodge) { continue; }
+					
 				if (cues[i].tick - lastTick >= minDistance && lastTick != 0 && i > 2) {
 					ranges.Add(new CueRange(lastTick, cues[i].tick, cues[i - 2].tick, cues[i].tick));
 				}
