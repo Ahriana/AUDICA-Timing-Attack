@@ -27,7 +27,8 @@ namespace TimingAttack {
 		[HarmonyPatch(typeof(CueDartManager), "ShouldCreateDart")]
 		class CueDartManager_ShouldCreateDart {
 			static bool Prefix (ref bool __result) {
-				var shouldDart = ShouldDart();
+                if (Config.CleanStacks) return __result;
+                var shouldDart = ShouldDart();
 				if (Config.HiddenDarts == true || ForceEnable == true || Data.firstDart == true || shouldDart == true) {
 					if (Data.firstDart == true || shouldDart == true) {
 						Data.firstDart = false;
@@ -43,10 +44,27 @@ namespace TimingAttack {
 		[HarmonyPatch(typeof(Telegraph), "Init", new Type[] { typeof(SongCues.Cue), typeof(float) })]
 		private static class PatchInit {
 			private static void Postfix (Telegraph __instance, SongCues.Cue cue, float animationSpeed) {
-				if (Config.HiddenClouds == true || ForceEnable == true) {
+				if (Config.HiddenClouds == true || ForceEnable == true || Config.CleanStacks) {
 					if (cue.behavior == Target.TargetBehavior.Melee || cue.behavior == Target.TargetBehavior.Dodge) { return; }
-					__instance.cloud.enabled = false;
-				}
+                    if (Config.CleanStacks)
+                    {
+                        if (cue.nextCue.pitch == cue.pitch && (cue.nextCue.tick - cue.tick < 480))
+                        {
+                            __instance.cloud.enabled = false;
+                            hideNextCloud = true;
+                            return;
+                        }
+                        if (hideNextCloud)
+                        {
+                            hideNextCloud = false;
+                            __instance.cloud.enabled = false;
+                        }
+                    }
+                    else
+                    {
+                        __instance.cloud.enabled = false;
+                    }
+                }
 			}
 		}
 
