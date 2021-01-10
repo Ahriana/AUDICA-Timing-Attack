@@ -26,17 +26,18 @@ namespace TimingAttack {
 
 		[HarmonyPatch(typeof(CueDartManager), "ShouldCreateDart")]
 		class CueDartManager_ShouldCreateDart {
-			static bool Prefix (ref bool __result) {
-				var shouldDart = ShouldDart();
-				if (Config.HiddenDarts == true || ForceEnable == true || Data.firstDart == true || shouldDart == true) {
+			static bool Prefix () {
+				if (Config.HiddenDarts == true || ForceEnable == true) {
+					var shouldDart = ShouldDart();
 					if (Data.firstDart == true || shouldDart == true) {
 						Data.firstDart = false;
-						__result = true;
+						return true;
 					} else {
-						__result = false;
+						return false;
 					}
+				} else {
+					return true;
 				}
-				return __result;
 			}
 		}
 
