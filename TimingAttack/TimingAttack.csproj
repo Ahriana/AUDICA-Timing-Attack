@@ -212,7 +212,6 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>xcopy /y "$(TargetPath)" "C:\Program Files (x86)\Steam\steamapps\common\Audica\Mods"
-start steam://rungameid/1020340</PostBuildEvent>
+    <PostBuildEvent>xcopy /y "$(TargetPath)" "D:\Games\Steam\steamapps\common\Audica\Mods"</PostBuildEvent>
   </PropertyGroup>
 </Project>

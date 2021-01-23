@@ -7,6 +7,7 @@ using System.Linq;
 namespace TimingAttack {
 	public class TimingAttackClass: MelonMod {
 		public static bool ForceEnable = false;
+		public static bool hideNextCloud = false;
 
 		public override void OnApplicationStart () {
 			Config.RegisterConfig();
@@ -27,44 +28,40 @@ namespace TimingAttack {
 		[HarmonyPatch(typeof(CueDartManager), "ShouldCreateDart")]
 		class CueDartManager_ShouldCreateDart {
 			static bool Prefix (ref bool __result) {
-                if (Config.CleanStacks) return __result;
-                var shouldDart = ShouldDart();
-				if (Config.HiddenDarts == true || ForceEnable == true || Data.firstDart == true || shouldDart == true) {
+				var shouldDart = ShouldDart();
+				if (Config.HiddenDarts || ForceEnable || Data.firstDart || shouldDart) {
 					if (Data.firstDart == true || shouldDart == true) {
 						Data.firstDart = false;
-						__result = true;
+                        return true;
 					} else {
-						__result = false;
+                        return false;
 					}
 				}
-				return __result;
+                return true;
 			}
 		}
 
 		[HarmonyPatch(typeof(Telegraph), "Init", new Type[] { typeof(SongCues.Cue), typeof(float) })]
 		private static class PatchInit {
+			
 			private static void Postfix (Telegraph __instance, SongCues.Cue cue, float animationSpeed) {
 				if (Config.HiddenClouds == true || ForceEnable == true || Config.CleanStacks) {
 					if (cue.behavior == Target.TargetBehavior.Melee || cue.behavior == Target.TargetBehavior.Dodge) { return; }
-                    if (Config.CleanStacks)
-                    {
-                        if (cue.nextCue.pitch == cue.pitch && (cue.nextCue.tick - cue.tick < 480))
-                        {
-                            __instance.cloud.enabled = false;
-                            hideNextCloud = true;
-                            return;
-                        }
-                        if (hideNextCloud)
-                        {
-                            hideNextCloud = false;
-                            __instance.cloud.enabled = false;
-                        }
-                    }
-                    else
-                    {
-                        __instance.cloud.enabled = false;
-                    }
-                }
+					if (Config.CleanStacks) {
+                        if (cue.nextCue is null || cue.behavior == Target.TargetBehavior.ChainStart || cue.behavior == Target.TargetBehavior.Chain) return;
+						if (cue.nextCue.pitch == cue.pitch && (cue.nextCue.tick - cue.tick < 480)) {
+							__instance.cloud.enabled = false;
+							hideNextCloud = true;
+							return;
+						}
+						if (hideNextCloud) {
+							hideNextCloud = false;
+							__instance.cloud.enabled = false;
+						}
+					} else {
+						__instance.cloud.enabled = false;
+					}
+				}
 			}
 		}
 
@@ -74,7 +71,7 @@ namespace TimingAttack {
 				int currTick = (int)AudioDriver.I.mCachedTick;
 				if (currTick >= Data.darts[0][0] & currTick <= Data.darts[0][1]) {
 					// MelonLogger.Log($"DARTING: {(int)AudioDriver.I.mCachedTick}");
-					return true; 
+					return true;
 				}
 				if (currTick > Data.darts[0][1]) { Data.darts = Data.darts.Where((item, index) => index != 0).ToArray(); } // we dont talk about this
 
@@ -96,7 +93,7 @@ namespace TimingAttack {
 
 			// MelonLogger.Log($"Found {ranges2.Count} candidates!");
 			Data.darts = new int[ranges2.Count][];
-			
+
 			int i = 0;
 			foreach (CueRange Cue in ranges2) {
 				Data.darts[i] = new int[] { Cue.enableFrom, Cue.enableTo };
@@ -110,7 +107,7 @@ namespace TimingAttack {
 			int lastTick = 0;
 			for (int i = 0; i < cues.Length; i++) {
 				if (cues[i].behavior == Target.TargetBehavior.Melee || cues[i].behavior == Target.TargetBehavior.Dodge) { continue; }
-					
+
 				if (cues[i].tick - lastTick >= minDistance && lastTick != 0 && i > 2) {
 					ranges.Add(new CueRange(lastTick, cues[i].tick, cues[i - 2].tick, cues[i].tick));
 				}
