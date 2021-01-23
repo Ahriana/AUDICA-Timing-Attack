@@ -15,7 +15,7 @@ using TimingAttack;
 [assembly: AssemblyCopyright("")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
-[assembly: MelonInfo(typeof(TimingAttackClass), "TimingAttack", "1.2.0", "Ahriana")]
+[assembly: MelonInfo(typeof(TimingAttackClass), "TimingAttack", "1.3.0", "Ahriana")]
 [assembly: MelonGame("Harmonix Music Systems, Inc.", "Audica")]
 
 // Setting ComVisible to false makes the types in this assembly not visible
@@ -36,6 +36,5 @@ using TimingAttack;
 // You can specify all the values or you can default the Build and Revision Numbers
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.2.0")]
-[assembly: AssemblyFileVersion("1.2.0")]
-
+[assembly: AssemblyVersion("1.3.0")]
+[assembly: AssemblyFileVersion("1.3.0")]

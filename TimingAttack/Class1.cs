@@ -28,18 +28,16 @@ namespace TimingAttack {
 		[HarmonyPatch(typeof(CueDartManager), "ShouldCreateDart")]
 		class CueDartManager_ShouldCreateDart {
 			static bool Prefix (ref bool __result) {
-				if (Config.CleanStacks) { return __result; }
-					
 				var shouldDart = ShouldDart();
-				if (Config.HiddenDarts == true || ForceEnable == true || Data.firstDart == true || shouldDart == true) {
+				if (Config.HiddenDarts || ForceEnable || Data.firstDart || shouldDart) {
 					if (Data.firstDart == true || shouldDart == true) {
 						Data.firstDart = false;
-						__result = true;
+                        return true;
 					} else {
-						__result = false;
+                        return false;
 					}
 				}
-				return __result;
+                return true;
 			}
 		}
 
@@ -50,6 +48,7 @@ namespace TimingAttack {
 				if (Config.HiddenClouds == true || ForceEnable == true || Config.CleanStacks) {
 					if (cue.behavior == Target.TargetBehavior.Melee || cue.behavior == Target.TargetBehavior.Dodge) { return; }
 					if (Config.CleanStacks) {
+            if (cue.nextCue is null || cue.behavior == Target.TargetBehavior.ChainStart || cue.behavior == Target.TargetBehavior.Chain) return;
 						if (cue.nextCue.pitch == cue.pitch && (cue.nextCue.tick - cue.tick < 480)) {
 							__instance.cloud.enabled = false;
 							hideNextCloud = true;
